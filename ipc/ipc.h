@@ -18,31 +18,29 @@
 #define IPC_USECS(n) ((n)*IPC_NSECS_IN_USEC)
 
 typedef int (*get_size_fn)(void *);
-typedef int (*serialize_fn)(uint8_t *, void *);
-typedef void (*deserialize_fn)(uint8_t *, void **, int);
 
 typedef struct ipc_topic_descriptor
 {
+	uint32_t sample_size;
+	const uint32_t *topic_ops;
 	get_size_fn get_size;
-	serialize_fn serialize;
-	deserialize_fn deserialize;
 } ipc_topic_descriptor_t;
 
 typedef struct ipc_entity
 {
 	void *entity;
-	ipc_topic_descriptor_t *topic;
+	const ipc_topic_descriptor_t *topic;
 } ipc_entity;
 
 typedef struct ipc_entity *ipc_entity_t;
 
 extern void ipc_init(void **context);
 
-extern int ipc_create_publisher(void *context, ipc_entity_t *zmq_pub, const char *addr, ipc_topic_descriptor_t *topic);
+extern int ipc_create_publisher(void *context, ipc_entity_t *zmq_pub, const char *addr, const ipc_topic_descriptor_t *topic);
 
 extern int ipc_write(ipc_entity_t zmq_pub, void *sample, int flags);
 
-extern int ipc_create_subscriber(void *context, ipc_entity_t *zmq_sub, const char *addr, ipc_topic_descriptor_t *topic);
+extern int ipc_create_subscriber(void *context, ipc_entity_t *zmq_sub, const char *addr, const ipc_topic_descriptor_t *topic);
 
 extern int ipc_read(ipc_entity_t zmq_sub, void **sample, bool *valid_data);
 
