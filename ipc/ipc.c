@@ -39,9 +39,9 @@ int ipc_write(ipc_entity_t zmq_pub, void *sample, int flags)
 	free(buff);
 
 	if (ret != _size)
-		return -1;
-
-	return ret;
+		return ERROR_DATA_WRITING;
+	else 
+		return NO_ERROR;
 }
 
 int ipc_create_subscriber(void *context, ipc_entity_t *zmq_sub, const char *addr, const ipc_topic_descriptor_t *topic)
@@ -66,7 +66,10 @@ int ipc_read(ipc_entity_t zmq_sub, void **sample, bool *valid_data)
 		first 4-byte carries the value of total data length behind
 	*/
 	uint8_t head[4];
-	zmq_recv(zmq_sub->entity, head, 4, 0);
+	uint32_t ret = zmq_recv(zmq_sub->entity, head, 4, 0);
+	
+	if (ret != 4)
+		return ERROR_DATA_READING;
 
 	uint32_t _size;
 	deserialize_u32(head, &_size, 1);
@@ -76,12 +79,13 @@ int ipc_read(ipc_entity_t zmq_sub, void **sample, bool *valid_data)
 	*/
 	uint8_t *buff = calloc(_size, 1);
 
-	uint32_t ret = zmq_recv(zmq_sub->entity, buff, _size, 0);
+	ret = zmq_recv(zmq_sub->entity, buff, _size, 0);
 
 	if (ret != _size)
 	{
+		free(buff);
 		*valid_data = false;
-		return -1;
+		return ERROR_DATA_READING;
 	}
 	*valid_data = true;
 
@@ -92,7 +96,7 @@ int ipc_read(ipc_entity_t zmq_sub, void **sample, bool *valid_data)
 	free(buff);
 	*sample = temp;
 
-	return ret;
+	return NO_ERROR;
 }
 
 int ipc_entity_delete(ipc_entity_t entity)

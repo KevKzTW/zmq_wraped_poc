@@ -17,6 +17,10 @@
 #define IPC_MSECS(n) ((n)*IPC_NSECS_IN_MSEC)
 #define IPC_USECS(n) ((n)*IPC_NSECS_IN_USEC)
 
+#define NO_ERROR			0
+#define ERROR_DATA_WRITING -1001
+#define ERROR_DATA_READING -1002
+
 typedef int (*get_size_fn)(void *);
 
 typedef struct ipc_topic_descriptor
